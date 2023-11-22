@@ -33,7 +33,7 @@ public interface FileManager {
 
 	CompressAction compress();
 
-	PteroAction<Void> decompress(File compressedFile);
+	DecompressAction decompress(File compressedFile);
 
 	DeleteAction delete();
 

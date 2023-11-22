@@ -17,6 +17,7 @@
 package com.mattmalec.pterodactyl4j.client.entities;
 
 import com.mattmalec.pterodactyl4j.PteroAction;
+import com.mattmalec.pterodactyl4j.client.managers.DecompressAction;
 
 public interface File extends GenericFile {
 
@@ -28,5 +29,6 @@ public interface File extends GenericFile {
 
 	PteroAction<Void> copy();
 
-	PteroAction<Void> decompress();
+	DecompressAction decompress();
+
 }

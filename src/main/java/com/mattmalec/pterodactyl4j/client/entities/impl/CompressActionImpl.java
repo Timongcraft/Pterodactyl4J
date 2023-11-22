@@ -17,56 +17,83 @@
 package com.mattmalec.pterodactyl4j.client.entities.impl;
 
 import com.mattmalec.pterodactyl4j.client.entities.ClientServer;
+import com.mattmalec.pterodactyl4j.client.entities.Directory;
 import com.mattmalec.pterodactyl4j.client.entities.File;
 import com.mattmalec.pterodactyl4j.client.entities.GenericFile;
 import com.mattmalec.pterodactyl4j.client.managers.CompressAction;
 import com.mattmalec.pterodactyl4j.requests.PteroActionImpl;
 import com.mattmalec.pterodactyl4j.requests.Route;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import okhttp3.RequestBody;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class CompressActionImpl extends PteroActionImpl<File> implements CompressAction {
 
-	private final List<GenericFile> files;
+    private final List<GenericFile> files;
+    private Directory rootDirectory;
 
-	public CompressActionImpl(ClientServer server, PteroClientImpl impl) {
-		super(
-				impl.getP4J(),
-				Route.Files.COMPRESS_FILES.compile(server.getIdentifier()),
-				(response, request) -> new FileImpl(response.getObject(), "/", server));
-		this.files = new ArrayList<>();
-	}
+    public CompressActionImpl(ClientServer server, PteroClientImpl impl) {
+        super(
+                impl.getP4J(),
+                Route.Files.COMPRESS_FILES.compile(server.getIdentifier()));
+        this.files = new ArrayList<>();
+        setHandler((response, request) -> new FileImpl(response.getObject(), (rootDirectory == null ? "/" : rootDirectory.getPath()), server));
+    }
 
-	@Override
-	public CompressAction addFile(GenericFile file) {
-		files.add(file);
-		return this;
-	}
+    @Override
+    public CompressAction addFile(GenericFile file) {
+        files.add(file);
+        return this;
+    }
 
-	@Override
-	public CompressAction addFiles(GenericFile file, GenericFile... files) {
-		this.files.add(file);
+    @Override
+    public CompressAction addFiles(Collection<GenericFile> files) {
+        this.files.addAll(files);
+        return this;
+    }
 
-		if (files.length > 0) this.files.addAll(Arrays.asList(files));
+    @Override
+    public CompressAction addFiles(GenericFile file, GenericFile... files) {
+        this.files.add(file);
 
-		return this;
-	}
+        if (files.length > 0) this.files.addAll(Arrays.asList(files));
 
-	@Override
-	public CompressAction clearFiles() {
-		files.clear();
-		return this;
-	}
+        return this;
+    }
 
-	@Override
-	protected RequestBody finalizeData() {
-		List<String> array = files.stream().map(GenericFile::getPath).collect(Collectors.toList());
+    @Override
+    public CompressAction setRoot(Directory rootDirectory) {
+        this.rootDirectory = rootDirectory;
+        return this;
+    }
 
-		JSONObject json = new JSONObject().put("root", "/").put("files", array);
-		return getRequestBody(json);
-	}
+    @Override
+    public CompressAction clearFiles() {
+        files.clear();
+        return this;
+    }
+
+    @Override
+    protected RequestBody finalizeData() {
+        if (rootDirectory == null) {
+            List<String> array = files.stream().map(GenericFile::getPath).collect(Collectors.toList());
+
+            JSONObject json = new JSONObject().put("root", "/").put("files", array);
+            return getRequestBody(json);
+        }
+
+        final String rootPathFilter = rootDirectory.getPath() + "/";
+        List<String> array = files.stream().map(GenericFile::getPath)
+                .filter(path -> path.startsWith(rootPathFilter))
+                .map(path -> path.substring(rootPathFilter.length()))
+                .collect(Collectors.toList());
+
+        JSONObject json = new JSONObject().put("root", rootDirectory.getPath()).put("files", array);
+        return getRequestBody(json);
+    }
 }

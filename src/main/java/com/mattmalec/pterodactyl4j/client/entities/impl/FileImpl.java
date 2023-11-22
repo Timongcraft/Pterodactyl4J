@@ -20,6 +20,7 @@ import com.mattmalec.pterodactyl4j.PteroAction;
 import com.mattmalec.pterodactyl4j.client.entities.ClientServer;
 import com.mattmalec.pterodactyl4j.client.entities.DownloadableFile;
 import com.mattmalec.pterodactyl4j.client.entities.File;
+import com.mattmalec.pterodactyl4j.client.managers.DecompressAction;
 import com.mattmalec.pterodactyl4j.client.managers.FileManager;
 import org.json.JSONObject;
 
@@ -53,7 +54,7 @@ public class FileImpl extends GenericFileImpl implements File {
 	}
 
 	@Override
-	public PteroAction<Void> decompress() {
+	public DecompressAction decompress() {
 		return fileManager.decompress(this);
 	}
 }

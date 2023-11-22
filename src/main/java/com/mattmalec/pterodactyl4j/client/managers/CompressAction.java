@@ -17,14 +17,21 @@
 package com.mattmalec.pterodactyl4j.client.managers;
 
 import com.mattmalec.pterodactyl4j.PteroAction;
+import com.mattmalec.pterodactyl4j.client.entities.Directory;
 import com.mattmalec.pterodactyl4j.client.entities.File;
 import com.mattmalec.pterodactyl4j.client.entities.GenericFile;
+
+import java.util.Collection;
 
 public interface CompressAction extends PteroAction<File> {
 
 	CompressAction addFile(GenericFile file);
 
+	CompressAction addFiles(Collection<GenericFile> files);
+
 	CompressAction addFiles(GenericFile file, GenericFile... files);
+
+	CompressAction setRoot(Directory rootDirectory);
 
 	CompressAction clearFiles();
 }

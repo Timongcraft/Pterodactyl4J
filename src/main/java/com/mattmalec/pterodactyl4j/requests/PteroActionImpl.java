@@ -37,7 +37,7 @@ public class PteroActionImpl<T> implements PteroAction<T> {
 	private final Route.CompiledRoute route;
 	private final RequestBody data;
 	private long deadline = 0;
-	private final BiFunction<Response, Request<T>, T> handler;
+	private BiFunction<Response, Request<T>, T> handler;
 
 	public static <T> DeferredPteroAction<T> onExecute(P4J api, Supplier<? extends T> supplier) {
 		return new DeferredPteroAction<>(api, supplier);
@@ -134,6 +134,10 @@ public class PteroActionImpl<T> implements PteroAction<T> {
 	public void handleResponse(Response response, Request<T> request) {
 		if (response.isOk()) handleSuccess(response, request);
 		else request.setOnFailure(response);
+	}
+
+	public void setHandler(BiFunction<Response, Request<T>, T> handler) {
+		this.handler = handler;
 	}
 
 	public void handleSuccess(Response response, Request<T> request) {
