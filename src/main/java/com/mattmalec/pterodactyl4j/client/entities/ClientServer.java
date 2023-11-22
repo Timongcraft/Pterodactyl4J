@@ -90,6 +90,8 @@ public interface ClientServer extends Server {
 
 	PaginationAction<Backup> retrieveBackups();
 
+	PteroAction<Integer> retrieveBackupCount();
+
 	PteroAction<Backup> retrieveBackup(UUID uuid);
 
 	default PteroAction<Backup> retrieveBackup(String uuid) {

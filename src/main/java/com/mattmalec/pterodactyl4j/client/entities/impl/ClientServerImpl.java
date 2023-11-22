@@ -188,6 +188,20 @@ public class ClientServerImpl implements ClientServer {
 	}
 
 	@Override
+	public PteroAction<Integer> retrieveBackupCount() {
+		return PteroActionImpl.onRequestExecute(
+				impl.getP4J(),
+				Route.Backups.LIST_BACKUPS.compile(getIdentifier()),
+				(response, request) -> {
+					JSONObject object = response.getObject();
+					if (object.has("meta"))
+						return object.getJSONObject("meta").getInt("backup_count");
+
+					return -1;
+				});
+	}
+
+	@Override
 	public BackupManager getBackupManager() {
 		return new BackupManagerImpl(this, impl);
 	}
